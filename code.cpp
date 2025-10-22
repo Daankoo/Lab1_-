@@ -1,113 +1,113 @@
+// роздільна компіляція
+// з кейсів операції перекинути у функції і закинути їх в окремий файл
+// у інсерті лишня перевірка, вона повторюється у кейсі
+// як ідея до вайл замінити на іф елс
+
+#include <iostream> 
+#include <string>
 #include <list>
-#include <algorithm> // Знадобиться для std::find
+
+using namespace std;
 
 template <typename T>
-class MySet {
+class Set {
 private:
-    std::list<T> elements; // Ось тут ми використовуємо список для зберігання
+    list<T> elements; 
 
 public:
-    // Тут ми будемо реалізовувати всі необхідні операції
+    bool SEARCH(const T & element) const {
+        for (const T& item : elements) {
+            if (item == element) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    void INSERT(const T& element) {
+        if (SEARCH(element) == true) {
+            elements.push_back(element);
+        }
+    }
+
+    void DELETE(const T& element) {
+        elements.remove(element); 
+    }
+
+    void CLEAR() {
+        elements.clear(); 
+    }
 };
 
-bool SEARCH(const T& element) const {
-    // std::find пробігає по списку від .begin() до .end()
-    // і шукає 'element'. Якщо знаходить, повертає ітератор на нього,
-    // інакше повертає .end().
-    return std::find(elements.begin(), elements.end(), element) != elements.end();
-}
+int main() {
 
-void INSERT(const T& element) {
-    // Якщо елемент *не* знайдено (SEARCH повертає false)
-    if (!SEARCH(element)) {
-        elements.push_back(element); // Додаємо в кінець списку
-    }
-}
+    cout << boolalpha;
 
-void DELETE(const T& element) {
-    // std::list::remove знаходить *всі* входження 'element' і видаляє їх.
-    // Оскільки у нас множина, там має бути не більше одного.
-    elements.remove(element);
-}
+    Set<int> intSet;
 
-void CLEAR() {
-    elements.clear();
-}
+    int choice, a, b, c;
 
-MySet<T> UNION(const MySet<T>& other) const {
-    MySet<T> result = *this; // 1. Копіюємо всі елементи з першої множини (this)
+    cout << "\nSELECT AN OPERATION...";
+    cout << "\n---------------------------";
+    cout << "\n\n1 - SEARCH";
+    cout << "\n2 - INSERT";
+    cout << "\n3 - DELETE";
+    cout << "\n4 - CLEAR";
+    cout << "\n\n0 - FINISH WORK";
+    cout << "\n\n---------------------------";
 
-    // 2. Додаємо всі елементи з другої множини (other)
-    for (const T& element : other.elements) {
-        result.INSERT(element); // Наш INSERT сам подбає про дублікати
-    }
-    return result;
-}
+    do {
+        cout << "\n\nYour choice: ";
+        cin >> choice;
 
-MySet<T> INTERSECTION(const MySet<T>& other) const {
-    MySet<T> result;
-    // Пробігаємо по елементах першої множини
-    for (const T& element : this->elements) {
-        // Якщо елемент є і в другій множині
-        if (other.SEARCH(element)) {
-            result.INSERT(element); // Додаємо його до результату
+        if (choice == 1 || choice == 2 || choice == 3 || choice == 4) {
+            switch (choice) {
+
+            case 1: {
+                cout << "Enter: element for search: ";
+                cin >> a;
+                cout << "Result:" << intSet.SEARCH(a);
+                break;
+            }
+            case 2: {
+                cout << "Enter: element for insert: ";
+                cin >> b;
+                if (intSet.SEARCH(b) == true) {
+                    cout << "b prisutniu";
+                }
+                else {
+                    intSet.INSERT(b);
+                    cout << "Result: Done!";
+                }
+                break;
+            }
+            case 3: {
+                cout << "Enter: element for delete: ";
+                cin >> c;
+                if (intSet.SEARCH(c) == true) {
+                    intSet.DELETE(c);
+                    cout << "delete done";
+                }
+                else {
+                    cout << "Elemenya net";
+                }
+                
+                break;
+            }
+            case 4: {
+                intSet.CLEAR();
+                cout << "Result:" << "Fucking Set";
+                break;
+            }
+            }
         }
+        else
+            cout << "\n\nTry again... ";
     }
-    return result;
-}
+    while (choice != 0);
+    cout << "\nError 404\n";
 
-MySet<T> SETDIFFERENCE(const MySet<T>& other) const {
-    MySet<T> result;
-    // Пробігаємо по елементах першої множини (this)
-    for (const T& element : this->elements) {
-        // Якщо елемента *немає* в другій множині
-        if (!other.SEARCH(element)) {
-            result.INSERT(element); // Додаємо його до результату
-        }
-    }
-    return result;
-}
-
-MySet<T> SYM_DIFFERENCE(const MySet<T>& other) const {
-    MySet<T> uni = this->UNION(other);
-    MySet<T> inter = this->INTERSECTION(other);
-    return uni.SETDIFFERENCE(inter);
-}
-
-bool ISSUBSET(const MySet<T>& other) const {
-    // Пробігаємо по елементах `this`
-    for (const T& element : this->elements) {
-        // Якщо ми знайшли хоча б один елемент,
-        // якого *немає* в 'other', то це не підмножина
-        if (!other.SEARCH(element)) {
-            return false;
-        }
-    }
-    // Якщо цикл завершився, значить всі елементи на місці
-    return true;
-}
-
-#include <chrono>
-#include <vector>
-#include <random> // Для генерації даних
-
-// ... (припустимо, у вас є згенерована MySet<int> setN розміром N)
-// ... (і згенерований std::vector<int> elementsToFind, яких НЕМАЄ в setN)
-
-// Випадок 1: Елемент є
-auto start_found = std::chrono::high_resolution_clock::now();
-for (int i = 0; i < 1000; ++i) {
-    int element = /* взяти випадковий елемент, що ТОЧНО є в setN */;
-    setN.SEARCH(element);
-}
-auto end_found = std::chrono::high_resolution_clock::now();
-double time_found_avg = std::chrono::duration_cast<std::chrono::nanoseconds>(end_found - start_found).count() / 1000.0;
-
-// Випадок 2: Елемента немає
-auto start_not_found = std::chrono::high_resolution_clock::now();
-for (int i = 0; i < 1000; ++i) {
-    int element = /* взяти випадковий елемент, якого НЕМАЄ в setN */;
-    setN.SEARCH(element);
-}
-auto end_not_found = std::chrono::high_resolution_clock::now();
+    return 0;
+};
 double time_not_found_avg = std::chrono::duration_cast<std::chrono::nanoseconds>(end_not_found - start_not_found).count() / 1000.0;
