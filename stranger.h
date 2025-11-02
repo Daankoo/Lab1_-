@@ -23,25 +23,16 @@ public:
     void INSERT(const T& element) {
         if (SEARCH(element) == false) {
             elements.push_back(element);
-            cout << "Result: Done!";
         }
-        else
-            cout << "The element already exists";
     }
 
     void DELETE(const T& element) {
-        if (SEARCH(element) == false) {
-            cout << "No element";
-        }
-        else {
+        if (SEARCH(element) == true) 
             elements.remove(element);
-            cout << "Element remove";
-        }
     }
 
     void CLEAR() {
         elements.clear();
-        cout << "Result:" << "Fucking Set";
     }
 
     void PRINT() const {
@@ -53,5 +44,55 @@ public:
         for (const T& item : elements) {
             cout << item << " ";
         }
+    }
+
+    Set<T> UNION(const Set<T>& other) const {
+        Set<T> result; 
+
+        for (const T& item : this->elements) {
+            result.INSERT(item);
+        }
+        for (const T& item : other.elements) {
+            result.INSERT(item);
+        }
+        return result; 
+    }
+
+    Set<T> INTERSECTION(const Set<T>& other) const {
+        Set<T> result;
+
+        for (const T& item : elements) {
+            if (other.SEARCH(item)) {
+                result.INSERT(item);
+            }
+        }
+        return result;
+    }
+
+    Set<T> SETDIFFERENCE(const Set<T>& other) const {
+        Set<T> result;
+
+        for (const T& item : elements) {
+            if (!other.SEARCH(item)) {
+                result.INSERT(item);
+            }
+        }
+        return result;
+    }
+
+    bool ISSUBSET(const Set<T>& other) const {
+        for (const T& item : elements) {
+            if (!other.SEARCH(item)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    Set<T> SYM_DIFFERENCE(const Set<T>& other) const {
+        Set<T> uni = UNION(other);
+        Set<T> inter = INTERSECTION(other);
+
+        return uni.SETDIFFERENCE(inter);
     }
 };
